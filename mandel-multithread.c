@@ -148,8 +148,8 @@ void* calculate (void* arg){
 			//c.re = zoom * (-1.0 + cd->imageRelation * ( (x-1.0) / (cd->width-1.0)) );
             //c.im = zoom * ( 0.5 - (y-1.0) / (cd->height-1.0) );
             
-            c.re = map(x, 0, cd->width, min, max);
-            c.im = map(y, 0, cd->height, min, max);
+            c.re = map((x-1), 0, (cd->width-1), min, max);
+            c.im = map((y-1), 0, (cd->height-1), min, max);
 			
 			// iterate
 			for ( iterate=1; iterate < colorLimit && quad < quadLimit; ++iterate ) {
