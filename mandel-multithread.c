@@ -10,9 +10,15 @@
 // there will be a low level I/O function from the operating system
 extern long write(int, const char *, unsigned long);
 
+
 float zoom      = 1.5;
 float quadLimit = 3.0;
 char colorLimit = 40;
+
+long double min = -2.84;
+long double max = 1;
+int MAX_ITERATIONS = 120;
+long double factor = 1;
 
 typedef enum { FALSE, TRUE } boolean;
 
@@ -30,6 +36,11 @@ typedef struct calculateData {
 	float imageRelation;
 	int threadNum;
 } calculateData;
+
+long double map(long double value, long double in_min, long double in_max, long double out_min, long double out_max)
+{
+    return(value-in_min)*(out_max-out_min)/(in_max-in_min)+out_min;
+}
 
 void printBits(size_t const size, void const * const ptr)
 {
@@ -134,8 +145,11 @@ void* calculate (void* arg){
 			Complex z = {0,0};
 			float quad=0;
 			
-			c.re = zoom * (-1.0 + cd->imageRelation * ( (x-1.0) / (cd->width-1.0)) );
-			c.im = zoom * ( 0.5 - (y-1.0) / (cd->height-1.0) );
+			//c.re = zoom * (-1.0 + cd->imageRelation * ( (x-1.0) / (cd->width-1.0)) );
+            //c.im = zoom * ( 0.5 - (y-1.0) / (cd->height-1.0) );
+            
+            c.re = map(x, 0, cd->width, min, max);
+            c.im = map(y, 0, cd->height, min, max);
 			
 			// iterate
 			for ( iterate=1; iterate < colorLimit && quad < quadLimit; ++iterate ) {
@@ -257,7 +271,14 @@ int main(int argc, char ** argv, char ** envp) {
 			free(lines[i]);
 		}
 		count++;
-		zoom=zoom-0.01;
+        //zoom=zoom-0.01;
+        max -= 0.1 * factor;
+        min += 0.15 * factor;
+        factor *=0.9349;
+
+        if((count > 5) && colorLimit < MAX_ITERATIONS){
+            colorLimit *=1.05;
+        }
 	}
 	free(lines);
 	SDL_Quit();
